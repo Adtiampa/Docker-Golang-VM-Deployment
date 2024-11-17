@@ -1,0 +1,73 @@
+/* src/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Light theme variables */
+:root {
+  --gradient-start: #6366f1;
+  --gradient-end: #a855f7;
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --glass-bg: rgba(255, 255, 255, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-input: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark theme variables */
+:root[class~="dark"] {
+  --gradient-start: #1e1b4b;
+  --gradient-end: #4c1d95;
+  --text-primary: #f3f4f6;
+  --text-secondary: #d1d5db;
+  --glass-bg: rgba(0, 0, 0, 0.25);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-input: rgba(0, 0, 0, 0.2);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  @apply transition-colors duration-300;
+}
+
+.app-background {
+  @apply min-h-screen transition-all duration-300;
+  background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);
+}
+
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--glass-border);
+}
+
+.glass-input {
+  background: var(--glass-input);
+  border: 1px solid var(--glass-border) !important;
+}
+
+.glass-input:focus {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border) !important;
+}
+
+@layer components {
+  .glass-button {
+    @apply backdrop-blur-sm transition-all duration-300;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+  }
+
+  .glass-button:hover {
+    background: var(--glass-input);
+  }
+}
