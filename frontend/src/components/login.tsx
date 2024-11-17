@@ -1,45 +1,34 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthProps, LoginCredentials, AuthResponse, AuthError } from '../types/auth';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
 
-const Login: React.FC<AuthProps> = ({ setIsAuthenticated }) => {
-    const [formData, setFormData] = useState<LoginCredentials>({
+const Login = () => {
+    const { setToken } = useAuth();
+    const navigate = useNavigate();
+    const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
-    const [error, setError] = useState<string>('');
-    const navigate = useNavigate();
+    const [error, setError] = useState('');
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-    };
-
-    const handleSubmit = async (e: FormEvent): Promise<void> => {
+    const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:8080/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-                credentials: 'include',
-            });
+            const { data, error } = await api.login(formData.email, formData.password);
 
-            const data = await response.json() as AuthResponse | AuthError;
+            if (error) {
+                setError(error);
+                return;
+            }
 
-            if (response.ok) {
-                setIsAuthenticated(true);
+            if (data?.token) {
+                setToken(data.token);
                 navigate('/home');
-            } else {
-                setError((data as AuthError).message);
             }
         } catch (err) {
             setError('Failed to connect to server');
+
         }
     };
 
@@ -71,7 +60,7 @@ const Login: React.FC<AuthProps> = ({ setIsAuthenticated }) => {
                             name="email"
                             type="email"
                             value={formData.email}
-                            onChange={handleChange}
+                            onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                             className="w-full px-4 py-3 rounded-lg glass-input text-primary dark:text-white placeholder-secondary dark:placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-primary/50 dark:focus:ring-white/50"
                             placeholder="Enter your email"
                             required
@@ -87,7 +76,7 @@ const Login: React.FC<AuthProps> = ({ setIsAuthenticated }) => {
                             name="password"
                             type="password"
                             value={formData.password}
-                            onChange={handleChange}
+                            onChange={(e) => setFormData(prev => ({ ...prev, password: e.target.value }))}
                             className="w-full px-4 py-3 rounded-lg glass-input text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white/50"
                             placeholder="Enter your password"
                             required

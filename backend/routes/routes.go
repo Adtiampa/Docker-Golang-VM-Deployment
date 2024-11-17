@@ -8,12 +8,14 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
-	// Public routes
+	// Health check route
+	app.Get("/health", handlers.HealthCheck)
+
+	// Your existing routes
 	api := app.Group("/api")
 	api.Post("/signup", handlers.SignUp)
 	api.Post("/login", handlers.Login)
 
-	// Protected routes
 	protected := api.Group("/", middleware.Protected())
 	protected.Get("/profile", handlers.GetProfile)
 }

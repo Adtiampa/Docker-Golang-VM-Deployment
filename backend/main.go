@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/gofiber/fiber/v2"
+
 	"backend/database"
 	"backend/routes"
 
@@ -32,8 +34,9 @@ func main() {
 
 	// Middleware
 	app.Use(logger.New())
+	domain := os.Getenv("DOMAIN")
 	app.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://localhost:5173",
+		AllowOrigins:     domain,
 		AllowMethods:     "GET,POST,PUT,DELETE",
 		AllowHeaders:     "Origin,Content-Type,Accept,Authorization",
 		AllowCredentials: true,

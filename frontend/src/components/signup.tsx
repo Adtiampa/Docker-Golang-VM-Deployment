@@ -1,9 +1,11 @@
 import { useState, FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthProps, LoginCredentials, AuthResponse, AuthError } from '../types/auth';
+import {api} from "../services/api.ts";
+import {useAuth} from "../contexts/AuthContext.tsx";
 
-const Signup: React.FC<AuthProps> = ({ setIsAuthenticated }) => {
-    const [formData, setFormData] = useState<LoginCredentials>({
+const Signup = () => {
+    const { setToken } = useAuth();
+    const [formData, setFormData] = useState({
         email: '',
         password: '',
     });
@@ -21,22 +23,14 @@ const Signup: React.FC<AuthProps> = ({ setIsAuthenticated }) => {
     const handleSubmit = async (e: FormEvent): Promise<void> => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:8080/api/signup', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-                credentials: 'include',
-            });
-
-            const data = await response.json() as AuthResponse | AuthError;
-
-            if (response.ok) {
-                setIsAuthenticated(true);
+            const { data, error } = await api.signup(formData.email, formData.password);
+            if (error) {
+                setError(error);
+                return;
+            }
+            if (data?.token) {
+                setToken(data.token);
                 navigate('/home');
-            } else {
-                setError((data as AuthError).message);
             }
         } catch (err) {
             setError('Failed to connect to server');
