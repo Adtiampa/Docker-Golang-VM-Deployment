@@ -1,38 +1,22 @@
-# Build stage
-FROM golang:1.22.5 AS builder
+# Packager stage
+FROM --platform=linux/arm64 golang:1.22.5 AS packager
 
-# Set the working directory
 WORKDIR /app
-
-# Copy go.mod and go.sum files
 COPY go.mod go.sum ./
-
-# Download Go dependencies
 RUN go mod download
 
-# Copy the source code
-COPY . .
+# Builder stage
+FROM --platform=linux/arm64 golang:1.22.5 AS builder
 
-# Build the Go application
-RUN CGO_ENABLED=0 GOOS=linux go build -o app .
+WORKDIR /app
+COPY . .
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o main .
 
 # Runtime stage
-FROM debian:bullseye AS runner
+FROM --platform=linux/arm64 debian:bullseye-slim AS runner
 
-# Set the working directory
 WORKDIR /app
-
-# Install necessary dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy the built binary from the builder stage
-COPY --from=builder /app/app .
-
-# Expose the application's port
+COPY --from=builder /app/main .
+COPY .env .
 EXPOSE 8080
-
-# Run the application
-CMD ["/app/app"]
+CMD ["/app/main"]
